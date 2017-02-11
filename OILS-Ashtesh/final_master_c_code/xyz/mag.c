@@ -44,20 +44,38 @@ void poll_MM1(void)
   ///Send the poll command
  // send_MM_cmd("*00P\r");
   uint8_t c= 80;
-  
+  init_UART0();
   transmit_UART0(c);
+  //receive_UART0();
   xp = ((int16_t)receive_UART0()) << 8;
+  uint8_t xp1_sen = xp>>8;
   xp &= 0xFF00;
   xp |= (int16_t)receive_UART0();
-  
+  uint8_t xp2_sen = xp;
   
   yp = ((int16_t)receive_UART0()) << 8;
+  uint8_t yp1_sen = yp>>8;
   yp &= 0xFF00;
   yp |= (int16_t)receive_UART0();
+  uint8_t yp2_sen = yp;
   
   zp = ((int16_t)receive_UART0()) << 8;
+  uint8_t zp1_sen = zp>>8;
   zp &= 0xFF00;
   zp |= (int16_t)receive_UART0();
+  uint8_t zp2_sen = zp;
+  
+  transmit_UART0(xp1_sen);
+  _delay_ms(1);
+  transmit_UART0(xp2_sen);
+   _delay_ms(1);
+  transmit_UART0(yp1_sen);
+   _delay_ms(1);
+  transmit_UART0(yp2_sen);
+   _delay_ms(1);
+  transmit_UART0(zp1_sen);
+   _delay_ms(1);
+  transmit_UART0(zp2_sen);
   
   //receive_MM();
   

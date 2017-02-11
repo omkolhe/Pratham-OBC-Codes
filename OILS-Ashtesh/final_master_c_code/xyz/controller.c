@@ -178,19 +178,19 @@ void apply_torque(vector v_m)
 	int32_t st;
 	// x.f=3.145689123;
 	 uint8_t buf0,buf1,buf2,buf3;
-	 
-	for (int i=0;i<3;i=i+1)
-	{
+	 //Anant Changes
+	//for (int i=0;i<3;i=i+1)
+	//{
 		//sen = ((int8_t)((lambda))/2);
-		st =(int32_t)(v_m[i]*65535000);
-		sen = (int8_t)st;
-		sen1 = (int8_t)(st>>8);
-		sen2 = (int8_t)(st>>16);
-		sen3 = (int8_t)(st>>24);
-		transmit_UART0(sen);
-		transmit_UART0(sen1);
-		transmit_UART0(sen2);
-		transmit_UART0(sen3);
+		//st =(int32_t)(v_m[i]*65535000);
+		//sen = (int8_t)st;
+		//sen1 = (int8_t)(st>>8);
+		//sen2 = (int8_t)(st>>16);
+		//sen3 = (int8_t)(st>>24);
+		//transmit_UART0(sen);
+		//transmit_UART0(sen1);
+		//transmit_UART0(sen2);
+		//transmit_UART0(sen3);
 	/*x.f=v_m[i];	
 	buf0=((x.l&0xFF000000)>>24);
 	buf1=((x.l&0x00FF0000)>>16);
@@ -200,14 +200,15 @@ void apply_torque(vector v_m)
 	transmit_UART0(buf1);
 	transmit_UART0(buf2);
 	transmit_UART0(buf3);*/	
-	}
+	//}
 	
 	
-	sen = Mode;
-	transmit_UART0(sen);
-	sen = gps_power;
-	transmit_UART0(sen);
-	if (v_m[0] > 0)
+	//sen = Mode;
+	//transmit_UART0(sen);
+	//sen = gps_power;
+	//transmit_UART0(sen);
+	//Anant Changes-
+	if (v_m[0] > 0) //v_m is calculated current
 	{
 		Current_state.pwm.x = fabs((v_m[0] * PWM_RES) / I_MAX);
 		Current_state.pwm.x_dir = 0;
@@ -238,6 +239,30 @@ void apply_torque(vector v_m)
 		Current_state.pwm.z_dir = 1;
 	}
  
+	//Anant Changes
+	init_UART0();
+	
+	transmit_UART0(Current_state.pwm.x_dir);
+	sen1 = (uint8_t)Current_state.pwm.x;
+	transmit_UART0(sen1);
+	sen2 = (uint8_t)(Current_state.pwm.x>>8);
+	transmit_UART0(sen2);
+	
+	transmit_UART0(Current_state.pwm.y_dir);
+	sen1 = (uint8_t)Current_state.pwm.y;
+	transmit_UART0(sen1);
+	sen2 = (uint8_t)(Current_state.pwm.y>>8);
+	transmit_UART0(sen2);
+	
+	transmit_UART0(Current_state.pwm.z_dir);
+	sen1 = (uint8_t)Current_state.pwm.z;
+	transmit_UART0(sen1);
+	sen2 = (uint8_t)(Current_state.pwm.z>>8);
+	transmit_UART0(sen2);
+	
+	//Anant Changes-
+	
+	
  
 PORTA=0xA0;
 }
@@ -334,14 +359,28 @@ void control(void){
 	//if((gps_power) == 2)
 	//{
 		
-		if ((gps_power==2))
-		{
-   uint8_t q= 90;
-   transmit_UART0(q);
-    read_GPS();
-	                 //while(UCSR0B & _BV(RXCIE0));
-	_delay_ms(1000);// this is important can make it 1000 also.				 
+		if ((gps_power==2)){
+			_delay_ms(50);
+			uint8_t q= 90;
+			//Anant Changes
+			init_UART0(); //may not work
+			//Anant CHanges-
+			transmit_UART0(q);
+			read_GPS();
+			//while(UCSR0B & _BV(RXCIE0));
+			//Anant Changes
+			_delay_ms(1000);// this is important can make it 1000 also.	
+			//Anant CHanges-			 
 		}
+		//Anant Changes
+		else{
+			_delay_ms(50);
+			uint8_t q= 91;
+			init_UART0();
+			transmit_UART0(q);
+			
+		}
+		//Anant Changes-
 	//wdt_enable(WDTO_1S);
 	//wdt_reset();
 	
@@ -409,7 +448,7 @@ void control(void){
 	 /////////////////////////////////////////
 	  }
 
-	  
+	_delay_ms(50);  
     uint8_t e=100;
     transmit_UART0(e);
     read_SS();

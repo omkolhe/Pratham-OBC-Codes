@@ -231,7 +231,7 @@ int main(void){
       * * * * Task 1: Control codes
        * @ref control
        */
-	 
+	receive_UART0();	 
 	  
   while (1)
   {
@@ -264,8 +264,8 @@ int main(void){
 		write_data &= ~(1<<6);// Turn off Torq
 	}
 	
-	wdt_enable(WDTO_2S);
-	wdt_reset();
+	//wdt_enable(WDTO_2S);
+	//wdt_reset();
 	/*
 PORTA = 0xAA;
 TWI_start(); // Function to send start condition
@@ -520,11 +520,11 @@ if (countd >150)
 			}
 
 
-	wdt_enable(WDTO_2S);
-	wdt_reset();
+	//wdt_enable(WDTO_2S);
+	//wdt_reset();
 	control();
-	wdt_disable();
-	for (int i=0;i<12;i++)
+	//wdt_disable();
+	/*for (int i=0;i<12;i++)
 	{
 		transmit_UART0(GPS_Data[i]);
 	}
@@ -532,11 +532,11 @@ if (countd >150)
 	//flag_india = (int8_t)(Current_state.gps.lat);//(pow((Current_state.gps.lat - 22.5833),2) + cos(Current_state.gps.lat*3.141592/180)*pow((Current_state.gps.lon - 82.7666),2))*255/70000;
 	transmit_UART0(flag_india);
 	transmit_UART0(flag_mumbai);
-	transmit_UART0(flag_france);
-	for (int i = 0; i<7;i++)
-	{
-		transmit_UART0(HM_Data[i]);
-	}
+	transmit_UART0(flag_france);*/
+	//for (int i = 0; i<7;i++)
+	//{
+	//	transmit_UART0(HM_Data[i]);
+	//}
 	
 	light_main = light_cal();	
 	 if((HM_Data[6]&(0x40)) == 0) // OC Check for Torquer
@@ -634,11 +634,11 @@ if (countd >150)
 	overflow=tot_overflow-overflow;
 	counter_value = TCNT1 + (65535-counter_value);
 	uint32_t net_time =  (counter_value*DT + overflow*T)*1e3;
-	transmit_UART0((uint8_t)(net_time));
-	transmit_UART0((uint8_t)(net_time>>8));
-	transmit_UART0((uint8_t)(net_time>>16));
-	transmit_UART0((uint8_t)(net_time>>24));
-	transmit_UART0('\r');
+	//transmit_UART0((uint8_t)(net_time));
+	//transmit_UART0((uint8_t)(net_time>>8));
+	//transmit_UART0((uint8_t)(net_time>>16));
+	//transmit_UART0((uint8_t)(net_time>>24));
+	//transmit_UART0('\r');
 	//////////////////////////////////
 	timer_wait_reset();
 	//wdt_disable();
