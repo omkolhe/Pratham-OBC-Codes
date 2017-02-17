@@ -22,7 +22,7 @@ struct GPS_reading{// x y z vx vy vz lat lon alt have been changed from int 32 t
   int32_t v_x;
   int32_t v_y;
   int32_t v_z;
-  
+  int8_t anant_flag;
   ///* Latitude Longitude Altitude
   int32_t lat;
   int32_t lon;

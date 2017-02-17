@@ -312,11 +312,18 @@ void control(void){
   _delay_ms(1);
   
   read_MM();
+  init_UART0();
   // write apply torquer function here
-   if(Mode == DETUMBLING)
+   if(Mode == DETUMBLING){
    apply_torque(v_m_D);
-   else if(Mode == NOMINAL)
+   uint8_t d_flag = 4;
+   transmit_UART0(d_flag);
+   }
+   else if(Mode == NOMINAL){
    apply_torque(v_m_N);
+   uint8_t n_flag = 14;
+   transmit_UART0(n_flag);
+   }
    
   set_PWM();
   
@@ -364,12 +371,15 @@ void control(void){
 			uint8_t q= 90;
 			//Anant Changes
 			init_UART0(); //may not work
-			//Anant CHanges-
+			//Anant Changes-
 			transmit_UART0(q);
 			read_GPS();
 			//while(UCSR0B & _BV(RXCIE0));
 			//Anant Changes
-			_delay_ms(1000);// this is important can make it 1000 also.	
+			while(Current_state.gps.anant_flag==0){
+				continue;
+			}
+			Current_state.gps.anant_flag==1;	
 			//Anant CHanges-			 
 		}
 		//Anant Changes

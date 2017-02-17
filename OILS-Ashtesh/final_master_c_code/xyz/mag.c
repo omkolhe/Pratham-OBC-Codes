@@ -48,23 +48,29 @@ void poll_MM1(void)
   transmit_UART0(c);
   //receive_UART0();
   xp = ((int16_t)receive_UART0()) << 8;
-  uint8_t xp1_sen = xp>>8;
+  uint8_t xp1_sen = (uint8_t)(xp>>8);
   xp &= 0xFF00;
   xp |= (int16_t)receive_UART0();
-  uint8_t xp2_sen = xp;
+  uint8_t xp2_sen = (uint8_t)(xp);
   
   yp = ((int16_t)receive_UART0()) << 8;
-  uint8_t yp1_sen = yp>>8;
+  uint8_t yp1_sen =(uint8_t)( yp>>8);
   yp &= 0xFF00;
   yp |= (int16_t)receive_UART0();
-  uint8_t yp2_sen = yp;
+  uint8_t yp2_sen =(uint8_t)(yp);
   
   zp = ((int16_t)receive_UART0()) << 8;
-  uint8_t zp1_sen = zp>>8;
+  uint8_t zp1_sen =(uint8_t)( zp>>8);
   zp &= 0xFF00;
   zp |= (int16_t)receive_UART0();
-  uint8_t zp2_sen = zp;
+  uint8_t zp2_sen =(uint8_t)(zp);
   
+  //xp1_sen = 135;
+  //xp2_sen = 146;
+  //yp1_sen = 157;
+  //yp2_sen = 168;
+  //zp1_sen = 179;
+  //zp2_sen = 110;
   transmit_UART0(xp1_sen);
   _delay_ms(1);
   transmit_UART0(xp2_sen);

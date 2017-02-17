@@ -154,14 +154,16 @@ void poll_SS1(void)
   //uint8_t c= 100;
   ///Loop for reading the 6 sun sensor values
   //transmit_UART0(c);
- 
+  uint8_t sun_sen_anant[12];
   while(channel <= 5)
   {
     ///* Put the ADC reading in the appropriate variable
     Current_state.ss.reading[channel] = (uint16_t)receive_UART0();
+	sun_sen_anant[2*channel] = (uint8_t)(Current_state.ss.reading[channel]);
     Current_state.ss.reading[channel] = Current_state.ss.reading[channel] << 8;
     Current_state.ss.reading[channel] &= 0xFF00;
     Current_state.ss.reading[channel] |= (uint16_t)receive_UART0();
+	sun_sen_anant[2*channel + 1] = (uint8_t)(Current_state.ss.reading[channel]);
     channel++;
 	
   }
@@ -169,6 +171,11 @@ void poll_SS1(void)
   {
 	  Current_state.ss.read[i] = (double)(((double)Current_state.ss.reading[i])*3.3/1024.0);
   }
+  
+  for (int iter = 0; iter<12; iter++){
+	  transmit_UART0(sun_sen_anant[iter]);
+  }
+  
   /*uint8_t sen;
   for(int i=0;i<6;i=i+1)
   {

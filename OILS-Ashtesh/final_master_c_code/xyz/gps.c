@@ -22,7 +22,7 @@ volatile static uint8_t pos = 0xFF,vel = 0xFF,dop = 0xFF,geo = 0xFF, time = 0xFF
 ///Variables to check whether the message has ended
 volatile static uint8_t last_byte, message_end;
 //volatile static uint16_t pdop = 0xFFFF;
-
+//Current_state.gps.anant_flag =0;
 ///Temporary GPS reading
 volatile struct GPS_reading gps;
 
@@ -73,6 +73,7 @@ void init_UART_GPS(void)
  */
 ISR(USART0_RX_vect)
 { 
+	Current_state.gps.anant_flag = 0;
   PORTA ^= 0xf0;
   
   ///Buffer the Received Byte
@@ -280,10 +281,10 @@ ISR(USART0_RX_vect)
   if(( Current_state.gps.pdop < 500000)  && message_end) //&& (Current_state.gps.pdop!=0))
   {
     GPS_done = 1;
-    
+    Current_state.gps.anant_flag = 1;
     ///* Switch off the interrupt
     UCSR0B &= ~(_BV(RXCIE0));
-    
+   
     ///* Switch off the GPS device
     //power_down_peripheral(PGPS);
     
