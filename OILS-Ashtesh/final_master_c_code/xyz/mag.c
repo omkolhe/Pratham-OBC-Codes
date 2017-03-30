@@ -40,48 +40,43 @@ void poll_MM1(void)
 	///Temporary variables for magnetometer readings
   int16_t xp, yp, zp;
   uint8_t tmp;
-  
+  uint8_t MM_data_match = 0;
   ///Send the poll command
  // send_MM_cmd("*00P\r");
+  uint8_t data[6]; 
   uint8_t c= 80;
   init_UART0();
   transmit_UART0(c);
   //receive_UART0();
-  xp = ((int16_t)receive_UART0()) << 8;
-  uint8_t xp1_sen = (uint8_t)(xp>>8);
-  xp &= 0xFF00;
-  xp |= (int16_t)receive_UART0();
-  uint8_t xp2_sen = (uint8_t)(xp);
   
-  yp = ((int16_t)receive_UART0()) << 8;
-  uint8_t yp1_sen =(uint8_t)( yp>>8);
-  yp &= 0xFF00;
-  yp |= (int16_t)receive_UART0();
-  uint8_t yp2_sen =(uint8_t)(yp);
+	  while(!MM_data_match){
+		  
+	  xp = ((int16_t)receive_UART0()) << 8;
+	  data[0] = (uint8_t)(xp>>8);
+	  xp &= 0xFF00;
+	  xp |= (int16_t)receive_UART0();
+	  data[1] = (uint8_t)(xp);
   
-  zp = ((int16_t)receive_UART0()) << 8;
-  uint8_t zp1_sen =(uint8_t)( zp>>8);
-  zp &= 0xFF00;
-  zp |= (int16_t)receive_UART0();
-  uint8_t zp2_sen =(uint8_t)(zp);
+	  yp = ((int16_t)receive_UART0()) << 8;
+	  data[2] =(uint8_t)( yp>>8);
+	  yp &= 0xFF00;
+	  yp |= (int16_t)receive_UART0();
+	  data[3] =(uint8_t)(yp);
   
-  //xp1_sen = 135;
-  //xp2_sen = 146;
-  //yp1_sen = 157;
-  //yp2_sen = 168;
-  //zp1_sen = 179;
-  //zp2_sen = 110;
-  transmit_UART0(xp1_sen);
-  _delay_ms(1);
-  transmit_UART0(xp2_sen);
-   _delay_ms(1);
-  transmit_UART0(yp1_sen);
-   _delay_ms(1);
-  transmit_UART0(yp2_sen);
-   _delay_ms(1);
-  transmit_UART0(zp1_sen);
-   _delay_ms(1);
-  transmit_UART0(zp2_sen);
+	  zp = ((int16_t)receive_UART0()) << 8;
+	  data[4] =(uint8_t)( zp>>8);
+	  zp &= 0xFF00;
+	  zp |= (int16_t)receive_UART0();
+	  data[5] =(uint8_t)(zp);
+  
+	  for(int iter=0; iter<6; iter++){
+		  transmit_UART0(data[iter]);
+		  _delay_ms(1);
+	  }
+	  
+	  MM_data_match = receive_UART0();
+	  
+	  }
   
   //receive_MM();
   
