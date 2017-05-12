@@ -43,7 +43,7 @@ void poll_MM1(void)
   uint8_t MM_data_match = 0;
   ///Send the poll command
  // send_MM_cmd("*00P\r");
-  uint8_t data[6]; 
+  uint8_t data[9]; 
   uint8_t c= 80;
   init_UART0();
   transmit_UART0(c);
@@ -68,8 +68,13 @@ void poll_MM1(void)
 	  zp &= 0xFF00;
 	  zp |= (int16_t)receive_UART0();
 	  data[5] =(uint8_t)(zp);
+	  
+	  for(int iter=6; iter<9; iter++){
+		data[iter] = receive_UART0();
+	  }
+	  
   
-	  for(int iter=0; iter<6; iter++){
+	  for(int iter=0; iter<9; iter++){
 		  transmit_UART0(data[iter]);
 		  _delay_ms(1);
 	  }
@@ -82,9 +87,30 @@ void poll_MM1(void)
   
 
   ///Convert the readings to Gauss
-  Current_state.mm.B_x = ((float) xp) / 15000;
-  Current_state.mm.B_y = ((float) yp) / 15000;
-  Current_state.mm.B_z = ((float) zp) / 15000;
+  if(data[6]==0){
+      Current_state.mm.B_x = ((float) xp) / 15000;
+  }
+  else{
+	  Current_state.mm.B_x = ((float) xp) / 15000;
+	  Current_state.mm.B_x = -1*Current_state.mm.B_x;
+  }
+  
+  if(data[7]==0){
+	  Current_state.mm.B_y = ((float) yp) / 15000;
+  }
+  else{
+	  Current_state.mm.B_y = ((float) yp) / 15000;
+	  Current_state.mm.B_y = -1*Current_state.mm.B_y;
+  }
+  
+  if(data[8]==0){
+	  Current_state.mm.B_z = ((float) zp) / 15000;
+  }
+  else{
+	  Current_state.mm.B_z = ((float) zp) / 15000;
+	  Current_state.mm.B_z = -1*Current_state.mm.B_z;
+  }
+  
 }
 
 ISR(USART1_RX_vect)//ISR for Magmeter UART
