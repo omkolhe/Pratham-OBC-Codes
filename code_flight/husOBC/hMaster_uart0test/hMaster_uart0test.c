@@ -105,22 +105,32 @@ int main(void)
 	PORTA = 0x50;
 	_delay_ms(500);
 	
-	transmit_UART0('\r');
-	transmit_UART0('\r');
-	transmit_UART0('H');
-	transmit_UART0('i');
+	//transmit_UART0('\r');
+	//transmit_UART0('\r');
+	//transmit_UART0('H');
+	//transmit_UART0('i');
+	//
+	//transmit_string_UART0(array1);
+	//transmit_string_UART0(array2);
+	//transmit_UART0('0');
+	////temp = receive_UART0();
+	//transmit_UART0('\t');
+	////transmit_UART0(temp);
+	//read_UART0(rxbuff, 10);
+	//transmit_string_UART0(rxbuff);
 	
-	transmit_string_UART0(array1);
-	transmit_string_UART0(array2);
-	transmit_UART0('0');
-	//temp = receive_UART0();
-	transmit_UART0('\t');
-	//transmit_UART0(temp);
-	read_UART0(rxbuff, 10);
-	transmit_string_UART0(rxbuff);
+	uint8_t	send_data[10];
 	
+	for(int i=0; i<10; i++){
+		send_data[i] = 255*i/10;
+	}
+	
+	for(int i=0; i<10; i++){
+		transmit_UART0(send_data[i]);
+	}
 /************************************************************/
 	}
+	_delay_ms(1000);
 	return 0;
 }
 /************************************************************/

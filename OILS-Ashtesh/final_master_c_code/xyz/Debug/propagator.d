@@ -18,7 +18,7 @@ propagator.d propagator.o: .././propagator.c .././common.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\wdt.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h \
- .././mathutil.h .././frame.h .././peripherals.h .././hm.h \
+ .././uart.h .././mathutil.h .././frame.h .././peripherals.h .././hm.h \
  .././propagator.h .././igrf.h .././gps.h
 
 .././common.h:
@@ -60,6 +60,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h:
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h:
+
+.././uart.h:
 
 .././mathutil.h:
 

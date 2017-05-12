@@ -13,6 +13,7 @@
 #include "frame.h"
 #include "gps.h"
 #include "avr/sleep.h"
+#include "uart.h"
 static vector v_B;
 static vector v_w = { 0.0, 0.0, 0.0 };
 	static vector v_ieu = {0,0,0};//{ -428.9,-232.7,318.97 };
@@ -58,7 +59,7 @@ void detumbling(vector v_m_D)
 {
 	static vector v_B_old;
 	  v_B[2] = Current_state.mm.B_x;
-	  v_B[1] = -1*Current_state.mm.B_y;
+	  v_B[1] = Current_state.mm.B_y;
 	  v_B[0] = Current_state.mm.B_z;
 	  
 	if(first_B)
@@ -79,7 +80,96 @@ void detumbling(vector v_m_D)
 		v_B_avg[i] = (v_B[i] + v_B_old[i]) / 2;
 	}
 	
-	factor = (-1 * K_DETUMBLING * MAG_B) / vector_norm(v_B_avg);                         //factor = -1 / vector_norm(v_B_avg);//??????
+	uint8_t B_avg_send[9];
+	uint8_t B_avg_receive[9];
+	uint8_t dB_send[9];
+	uint8_t dB_receive[9];
+	
+	//transmit_UART0((uint8_t)33);
+	for(int iter=0; iter<3; iter++){
+		B_avg_send[2*iter] = (uint8_t)((int16_t)(abs(v_B_avg[iter]*15000)));
+		B_avg_send[2*iter+1] = (uint8_t)((int16_t)(abs(v_B_avg[iter]*15000))>>8);
+		dB_send[2*iter] = (uint8_t)((int16_t)(abs(v_dB[iter]*15000)));
+		dB_send[2*iter+1] = (uint8_t)((int16_t)(abs(v_dB[iter]*15000))>>8);
+	}
+	
+	for(int iter=6; iter<9; iter++){
+		
+		if(v_B_avg[iter-6]>=0){
+			B_avg_send[iter]= 0 ;
+		}
+		else
+			B_avg_send[iter] = 1;
+	
+		if(v_dB[iter-6]>=0){
+			dB_send[iter]= 0 ;
+		}
+		else
+			dB_send[iter] = 1;
+	}
+		
+		
+	uint8_t B_avg_send_data_match = 0;
+	uint8_t dB_send_data_match = 0;
+	
+	while(!B_avg_send_data_match){
+		B_avg_send_data_match = 1;
+		
+		for(int iter=0; iter<9; iter++){
+			transmit_UART0(B_avg_send[iter]);
+		}
+		
+		for (int iter=0; iter<9; iter++){
+			B_avg_receive[iter] = receive_UART0();
+		}
+		
+		for (int iter=0; iter<9; iter++){
+			if(B_avg_send[iter]!=B_avg_receive[iter]){
+				B_avg_send_data_match = 0;
+			}
+		}
+		transmit_UART0(B_avg_send_data_match);
+	}
+	
+	while(!dB_send_data_match){
+		dB_send_data_match = 1;
+		
+		for(int iter=0; iter<9; iter++){
+			transmit_UART0(dB_send[iter]);
+		}
+		
+		for (int iter=0; iter<9; iter++){
+			dB_receive[iter] = receive_UART0();
+		}
+		
+		for (int iter=0; iter<9; iter++){
+			if(dB_send[iter]!=dB_receive[iter]){
+				dB_send_data_match = 0;
+			}
+		}
+		transmit_UART0(B_avg_send_data_match);
+	}
+	
+	while(!dB_send_data_match){
+		dB_send_data_match = 1;
+		
+		for(int iter=0; iter<9; iter++){
+			transmit_UART0(dB_send[iter]);
+		}
+		
+		for (int iter=0; iter<9; iter++){
+			dB_receive[iter] = receive_UART0();
+		}
+		
+		for (int iter=0; iter<9; iter++){
+			if(dB_send[iter]!=dB_receive[iter]){
+				dB_send_data_match = 0;
+			}
+		}
+		transmit_UART0(dB_send_data_match);
+	}
+	
+	factor = (-1 * K_DETUMBLING * MAG_B) / vector_norm(v_B_avg);                         
 	
 	for(i = 0; i < 3; i++)
 	{
@@ -208,40 +298,81 @@ void apply_torque(vector v_m)
 	//sen = gps_power;
 	//transmit_UART0(sen);
 	//Anant Changes-
+	uint16_t i_mag[3];
 	if (v_m[0] > 0) //v_m is calculated current
 	{
 		Current_state.pwm.x = fabs((v_m[0] * PWM_RES) / I_MAX);
 		Current_state.pwm.x_dir = 0;
+		i_mag[0] = Current_state.pwm.x;
 	}
 	else
 	{
-	Current_state.pwm.x = fabs( (1+(v_m[0]/ I_MAX))*PWM_RES );
-	Current_state.pwm.x_dir = 1;
+		Current_state.pwm.x = fabs( (1+(v_m[0]/ I_MAX))*PWM_RES );
+		Current_state.pwm.x_dir = 1;
+		i_mag[0] = fabs((v_m[0] * PWM_RES) / I_MAX);
 	}
 	if (v_m[1] > 0)
 	{
 		Current_state.pwm.y = fabs((v_m[1] * PWM_RES) / I_MAX);
 		Current_state.pwm.y_dir = 0;
+		i_mag[1] = fabs((v_m[1] * PWM_RES) / I_MAX);
 	}
 	else
 	{
 		Current_state.pwm.y = fabs( (1+(v_m[1]/ I_MAX))*PWM_RES );
 		Current_state.pwm.y_dir = 1;
+		i_mag[1] = fabs((v_m[1] * PWM_RES) / I_MAX);
 	}
 	if (v_m[2] > 0)
 	{
 		Current_state.pwm.z = fabs((v_m[2] * PWM_RES) / I_MAX);
 		Current_state.pwm.z_dir = 0;
+		i_mag[2] = fabs((v_m[2] * PWM_RES) / I_MAX);
 	}
 	else
 	{
 		Current_state.pwm.z = fabs( (1+(v_m[2]/ I_MAX))*PWM_RES );
 		Current_state.pwm.z_dir = 1;
+		i_mag[2] = fabs((v_m[2] * PWM_RES) / I_MAX);
 	}
  
 	//Anant Changes
 	init_UART0();
+	uint8_t current_data_matched = 0;
+	uint8_t i_data[9], i_data_matched[9];
+	i_data[0] = Current_state.pwm.x_dir;
+	i_data[1] = (uint8_t)i_mag[0];
+	i_data[2] = (uint8_t)(i_mag[0]>>8);
+	i_data[3] = Current_state.pwm.y_dir;
+	i_data[4] = (uint8_t)(i_mag[1]);
+	i_data[5] = (uint8_t)(i_mag[1]>>8);
+	i_data[6] = Current_state.pwm.z_dir;
+	i_data[7] = (uint8_t)(i_mag[2]);
+	i_data[8] = (uint8_t)(i_mag[2]>>8);
 	
+	while(!current_data_matched){
+		
+		current_data_matched = 1;
+		
+		for(int iter=0; iter<9; iter++){
+			transmit_UART0(i_data[iter]);
+		}
+		
+		for(int iter=0; iter<9; iter++){
+			i_data_matched[iter] = receive_UART0();
+		}
+		
+		for(int iter=0; iter<9; iter++){
+			if(i_data_matched[iter]!=i_data[iter]){
+				current_data_matched = 0;
+			}
+		}
+		
+		transmit_UART0(current_data_matched);
+				
+	}
+	
+	/*
 	transmit_UART0(Current_state.pwm.x_dir);
 	sen1 = (uint8_t)Current_state.pwm.x;
 	transmit_UART0(sen1);
@@ -249,17 +380,17 @@ void apply_torque(vector v_m)
 	transmit_UART0(sen2);
 	
 	transmit_UART0(Current_state.pwm.y_dir);
-	sen1 = (uint8_t)Current_state.pwm.y;
+	sen1 = (uint8_t)(Current_state.pwm.y);
 	transmit_UART0(sen1);
 	sen2 = (uint8_t)(Current_state.pwm.y>>8);
 	transmit_UART0(sen2);
 	
 	transmit_UART0(Current_state.pwm.z_dir);
-	sen1 = (uint8_t)Current_state.pwm.z;
+	sen1 = (uint8_t)(Current_state.pwm.z);
 	transmit_UART0(sen1);
 	sen2 = (uint8_t)(Current_state.pwm.z>>8);
 	transmit_UART0(sen2);
-	
+	*/
 	//Anant Changes-
 	
 	
@@ -315,7 +446,7 @@ void control(void){
   init_UART0();
   // write apply torquer function here
    if(Mode == DETUMBLING){
-   apply_torque(v_m_D);
+   apply_torque(v_m_D); //only currents output
    uint8_t d_flag = 4;
    transmit_UART0(d_flag);
    }
@@ -328,7 +459,7 @@ void control(void){
   set_PWM();
   
   _delay_ms(10);
-  detumbling(v_m_D);
+  detumbling(v_m_D); //dB and B_avg output
   ///Set the torquer values calculated in the last frame
   //set_PWM();
   /*
@@ -355,7 +486,7 @@ void control(void){
   transmit_UART0(d);
   */
   v_B[2] = Current_state.mm.B_x;
-  v_B[1] = -1*Current_state.mm.B_y;
+  v_B[1] = Current_state.mm.B_y;
   v_B[0] = Current_state.mm.B_z;
   
   

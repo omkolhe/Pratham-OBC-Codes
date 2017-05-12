@@ -43,19 +43,19 @@ int main(void)
 	
 	init_UART0();
   
-	transmit_UART0('\r');
-	transmit_UART0('\r');
-	transmit_UART0('H');
-	transmit_UART0('e');
-	transmit_UART0('l');
-	transmit_UART0('l');
-	transmit_UART0('o');
-	
-	sprintf(array,"\t..This is IITB's Student Satellite...\r");
-	transmit_string_UART0(array);
-
-	sprintf(array1,"\tThis is HUSSAIN's OBC-Master code...");
-	sprintf(array2,"\rGenerating Torquer Current for =\t");
+	//transmit_UART0('\r');
+	//transmit_UART0('\r');
+	//transmit_UART0('H');
+	//transmit_UART0('e');
+	//transmit_UART0('l');
+	//transmit_UART0('l');
+	//transmit_UART0('o');
+	//
+	//sprintf(array,"\t..This is IITB's Student Satellite...\r");
+	//transmit_string_UART0(array);
+//
+	//sprintf(array1,"\tThis is HUSSAIN's OBC-Master code...");
+	//sprintf(array2,"\rGenerating Torquer Current for =\t");
 		
 /************************************************************/
 	configure_torquer();
@@ -66,7 +66,19 @@ int main(void)
 	_delay_ms(500);
 	PORTA = 0x50;
 	_delay_ms(500);
-	_delay_ms(1000);
+	//_delay_ms(1000);
+	
+	uint8_t data_send[10];
+	
+	for(int iter=0; iter<10; iter++){
+		data_send[iter] = receive_UART0();
+	}
+	
+	for(int iter=0; iter<10; iter++){
+		transmit_UART0(data_send[iter]);
+		_delay_ms(10);
+	}
+	
 	/*transmit_UART0('\r');
 	transmit_UART0('\r');
 	transmit_UART0('H');
@@ -103,7 +115,7 @@ int main(void)
 		Current_state.pwm.y = c;            //32768; 0.75
 		Current_state.pwm.z_dir =0;             // 0;
 		Current_state.pwm.z = c;                //0.25
-		set_PWM ();
+		//set_PWM ();
 	//}
     /*       CH2
 	PORTA = 0xA0;

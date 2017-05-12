@@ -7,7 +7,7 @@
 #include "sun.h"
 #include "spi.h"
 #include "peripherals.h"
-
+//#include "quest.h"
 void configure_SS(void)
 {
   ///Choose the ADC IC on the SPI bus

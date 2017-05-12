@@ -17,13 +17,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   6 .debug_abbrev 000000f3  00000000  00000000  00003ec7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000fb8  00000000  00000000  00003fba  2**0
+  7 .debug_line   00001465  00000000  00000000  00003fba  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00004f74  2**2
+  8 .debug_frame  00000024  00000000  00000000  00005420  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000001ae  00000000  00000000  00004f98  2**0
+  9 .debug_str    000001aa  00000000  00000000  00005444  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000010  00000000  00000000  00005146  2**0
+ 10 .debug_ranges 00000010  00000000  00000000  000055ee  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -679,8 +679,8 @@ Disassembly of section .text:
  404:	21 50       	subi	r18, 0x01	; 1
  406:	80 40       	sbci	r24, 0x00	; 0
  408:	90 40       	sbci	r25, 0x00	; 0
- 40a:	e1 f7       	brne	.-8      	; 0x404 <__SREG__+0x3c5>
- 40c:	00 c0       	rjmp	.+0      	; 0x40e <__SREG__+0x3cf>
+ 40a:	e1 f7       	brne	.-8      	; 0x404 <__FUSE_REGION_LENGTH__+0x4>
+ 40c:	00 c0       	rjmp	.+0      	; 0x40e <__FUSE_REGION_LENGTH__+0xe>
  40e:	00 00       	nop
 		_delay_ms(len1);
 		cbi(PORT_PA,PA_EN);
@@ -691,8 +691,8 @@ Disassembly of section .text:
  418:	21 50       	subi	r18, 0x01	; 1
  41a:	80 40       	sbci	r24, 0x00	; 0
  41c:	90 40       	sbci	r25, 0x00	; 0
- 41e:	e1 f7       	brne	.-8      	; 0x418 <__SREG__+0x3d9>
- 420:	00 c0       	rjmp	.+0      	; 0x422 <__SREG__+0x3e3>
+ 41e:	e1 f7       	brne	.-8      	; 0x418 <__FUSE_REGION_LENGTH__+0x18>
+ 420:	00 c0       	rjmp	.+0      	; 0x422 <__FUSE_REGION_LENGTH__+0x22>
  422:	00 00       	nop
 		_delay_ms(len3);
 		sbi(PORT_PA,PA_EN);
@@ -703,8 +703,8 @@ Disassembly of section .text:
  42c:	21 50       	subi	r18, 0x01	; 1
  42e:	80 40       	sbci	r24, 0x00	; 0
  430:	90 40       	sbci	r25, 0x00	; 0
- 432:	e1 f7       	brne	.-8      	; 0x42c <__SREG__+0x3ed>
- 434:	00 c0       	rjmp	.+0      	; 0x436 <__SREG__+0x3f7>
+ 432:	e1 f7       	brne	.-8      	; 0x42c <__FUSE_REGION_LENGTH__+0x2c>
+ 434:	00 c0       	rjmp	.+0      	; 0x436 <__FUSE_REGION_LENGTH__+0x36>
  436:	00 00       	nop
 		_delay_ms(len1);
 		cbi(PORT_PA,PA_EN);
@@ -715,8 +715,8 @@ Disassembly of section .text:
  440:	21 50       	subi	r18, 0x01	; 1
  442:	80 40       	sbci	r24, 0x00	; 0
  444:	90 40       	sbci	r25, 0x00	; 0
- 446:	e1 f7       	brne	.-8      	; 0x440 <__SREG__+0x401>
- 448:	00 c0       	rjmp	.+0      	; 0x44a <__SREG__+0x40b>
+ 446:	e1 f7       	brne	.-8      	; 0x440 <__FUSE_REGION_LENGTH__+0x40>
+ 448:	00 c0       	rjmp	.+0      	; 0x44a <__FUSE_REGION_LENGTH__+0x4a>
  44a:	00 00       	nop
 		_delay_ms(len1);
 		sbi(PORT_PA,PA_EN);
@@ -727,8 +727,8 @@ Disassembly of section .text:
  454:	21 50       	subi	r18, 0x01	; 1
  456:	80 40       	sbci	r24, 0x00	; 0
  458:	90 40       	sbci	r25, 0x00	; 0
- 45a:	e1 f7       	brne	.-8      	; 0x454 <__SREG__+0x415>
- 45c:	00 c0       	rjmp	.+0      	; 0x45e <__SREG__+0x41f>
+ 45a:	e1 f7       	brne	.-8      	; 0x454 <__FUSE_REGION_LENGTH__+0x54>
+ 45c:	00 c0       	rjmp	.+0      	; 0x45e <__FUSE_REGION_LENGTH__+0x5e>
  45e:	00 00       	nop
 		_delay_ms(len3);
 
