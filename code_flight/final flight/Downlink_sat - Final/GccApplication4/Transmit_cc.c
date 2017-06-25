@@ -185,6 +185,8 @@ void ccxxx0_WriteBurst(unsigned char, unsigned char*, unsigned int);
     Return parameters - void */
 
 void ccxxx0_PowerOnReset();
+// Power on reset. The manual reset is choosed.
+//The exact details of manual reset on page 51 datasheet.
 
 void ccxxx0_Setup(const RF_SETTINGS*);
 
@@ -243,7 +245,7 @@ void ATMEGA_Init(void)
 /* CRC autoflush = false */
 /* PA ramping = false */
 /* TX power = 10 */
-RF_SETTINGS rfSettings = {
+RF_SETTINGS rfSettings = { // Defining object of struct
         0X06,        //IOCFG0      GDO0 Output Pin Configuration
 		0X40,        //FIFOTHR     RX FIFO and TX FIFO Thresholds
 		0X05,        //PKTCTRL0    Packet Automation Control
@@ -380,32 +382,34 @@ void ccxxx0_WriteBurst(unsigned char addr, unsigned char* dataPtr, unsigned int 
     PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 }
 
-void ccxxx0_PowerOnReset()
+void ccxxx0_PowerOnReset() // Manual Reset
 {
 	unsigned char x;
-	//datasheet cc1101 pg on.51
-    PORTB |= (1 << CC_CSN);
+	//datasheet cc1101 pg on.51 Manual Reset
+    PORTB |= (1 << CC_CSN); // Make SS high
 	_delay_us(1);
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // Make SS low
 	_delay_us(1);
-    PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high fot atleast 41 us
 	_delay_us(41);
 
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // Make SS low
 
-	while(PINB & (1 << CC_SO));
+	while(PINB & (1 << CC_SO)); // wait for SO to go low
 
 	_delay_us(50);
 
-    SPDR = CCxxx0_SRES;
+    SPDR = CCxxx0_SRES; // Isssue the SRES command strobe
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // flush SPDR
 
-	while(PINB & (1 << CC_SO));
+	while(PINB & (1 << CC_SO)); // When SO goes low again, reset is complete
+
+// **THE CHIP IS IDLE STATE AFTER RESET**
 
 	_delay_us(50);
 
-    PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high
 }
 void ccxxx0_Setup(const RF_SETTINGS* settings)
 {
