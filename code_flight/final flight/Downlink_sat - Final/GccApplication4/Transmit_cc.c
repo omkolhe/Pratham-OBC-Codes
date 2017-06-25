@@ -161,6 +161,8 @@ typedef struct RF_SETTINGS {
 } RF_SETTINGS;
 
 unsigned char ccxxx0_Strobe(unsigned char);
+// Input parameters - adddress of the Command Strobe
+//Return parameters - the Chip Status byte
 
 unsigned char ccxxx0_Read(unsigned char);
  // Input parameters - adddress of the Byte to be read.
@@ -171,7 +173,16 @@ unsigned char ccxxx0_Write(unsigned char, unsigned char);
 // Return parameters - the Chip Status byte
 
 void ccxxx0_ReadBurst(unsigned char, unsigned char*, unsigned int);
+/** Input parameters - address of first byte to be read,
+                       the pointer of the array where we have to store the read values,
+											 the number of bytes to be read
+    Return parameters - void */
+
 void ccxxx0_WriteBurst(unsigned char, unsigned char*, unsigned int);
+/** Input parameters - address of first byte where we have to write,
+                       the pointer of the array where the values to be written are stored,
+											 the number of bytes to be written
+    Return parameters - void */
 
 void ccxxx0_PowerOnReset();
 
@@ -303,23 +314,23 @@ unsigned char ccxxx0_Write(unsigned char addr, unsigned char dat)
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // get data from SPDR
 
-	PORTB |= (1 << CC_CSN);
+	PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 
-	return x; // The CHip Status Byte 
+	return x; // The Chip Status Byte
 }
 
 unsigned char ccxxx0_Strobe(unsigned char addr)
 {
     unsigned char x;
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-    SPDR = addr;
+    SPDR = addr; // The address of the Strobe Command
 	while(!(SPSR & (1<<SPIF)));
-    x = SPDR; // flush SPDR
+    x = SPDR; // flush SPDR the Status Byte
 
-    PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 
     return x;
 }
@@ -328,45 +339,45 @@ void ccxxx0_ReadBurst(unsigned char addr, unsigned char* dataPtr, unsigned int d
 {
 	unsigned char x;
 
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-    SPDR = (addr | 0xc0);
+    SPDR = (addr | 0xc0); // Header Byte R/~W bit - 1 Burst bit - 1
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR;// flush SPDR
 
-	while(dataCount) {
+	while(dataCount) { // Loop that stops communication when desired number of bytes are read
 	    SPDR = 0;
 		while(!(SPSR & (1<<SPIF)));
 
-	    *dataPtr++ = SPDR; // get data from SPDR
+	    *dataPtr++ = SPDR; // get data from SPDR, *dataPtr++ points the next element
 		dataCount--;
 	}
 
-    PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 }
 
 void ccxxx0_WriteBurst(unsigned char addr, unsigned char* dataPtr, unsigned int dataCount)
 {
 	unsigned char x;
 
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-    SPDR = addr | 0x40;
+    SPDR = addr | 0x40; // Header Byte R/~W bit - 0 Burst bit - 1
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // flush SPDR
 
-	while(dataCount) {
+	while(dataCount) { // Loop that stops communication after desired number of writing cycles
 	    SPDR = *dataPtr++;
 		while(!(SPSR & (1<<SPIF)));
 
 		dataCount--;
 	}
 
-    PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 }
 
 void ccxxx0_PowerOnReset()
