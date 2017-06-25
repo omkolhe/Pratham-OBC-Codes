@@ -3,7 +3,7 @@
  *
  * Created: 02-10-2014 03:22:44
  *  Author: Someone Stud
- */ 
+ */
 #define F_CPU 8000000
 #include "uart.h"
 #include "common.h"
@@ -35,7 +35,7 @@ int transmitFlag = 0;
 #define SPIDI	4	//6	// Port B bit 4 (pin16): MISO->data in (data from CC_SO)
 #define SPICLK	5	//7	// Port B bit 5 (pin17): SCK->clock for CC
 
-// CC1101 
+// CC1101
 #define CC_GDO0	0	// Port B bit 0 (pin12) (pin6 of cc)
 #define CC_GDO2 1   // Port B bit 1 (pin13) (pin3 of cc)
 #define CC_CSN 	2	//4   // (pin7 of cc):-> chip select
@@ -116,18 +116,18 @@ int transmitFlag = 0;
 #define CCxxx0_SNOP         0x3D        // No operation. May be used to pad strobe commands to two
                                         // bytes for simpler software.
 // Status registers (read & burst)
-#define CCxxx0_PARTNUM      (0x30 | 0xc0)
-#define CCxxx0_VERSION      (0x31 | 0xc0)
-#define CCxxx0_FREQEST      (0x32 | 0xc0)
-#define CCxxx0_LQI          (0x33 | 0xc0)
-#define CCxxx0_RSSI         (0x34 | 0xc0)
-#define CCxxx0_MARCSTATE    (0x35 | 0xc0)
-#define CCxxx0_WORTIME1     (0x36 | 0xc0)
-#define CCxxx0_WORTIME0     (0x37 | 0xc0)
-#define CCxxx0_PKTSTATUS    (0x38 | 0xc0)
-#define CCxxx0_VCO_VC_DAC   (0x39 | 0xc0)
-#define CCxxx0_TXBYTES      (0x3A | 0xc0)
-#define CCxxx0_RXBYTES      (0x3B | 0xc0)
+#define CCxxx0_PARTNUM      (0x30 | 0xc0) // Part Number of CC1101
+#define CCxxx0_VERSION      (0x31 | 0xc0) // Current version Number
+#define CCxxx0_FREQEST      (0x32 | 0xc0) // Frequency Offset Estimate
+#define CCxxx0_LQI          (0x33 | 0xc0) // Demodulator Estimate for Link Quality
+#define CCxxx0_RSSI         (0x34 | 0xc0) // Received signal strength indication
+#define CCxxx0_MARCSTATE    (0x35 | 0xc0) // Control State Machine State
+#define CCxxx0_WORTIME1     (0x36 | 0xc0) // Hight Byte of Wake-on-Radio time
+#define CCxxx0_WORTIME0     (0x37 | 0xc0) // Low Byte of Wake-on-Radio time
+#define CCxxx0_PKTSTATUS    (0x38 | 0xc0) // Current GDOx status and packet status
+#define CCxxx0_VCO_VC_DAC   (0x39 | 0xc0) // Current setting from PLL calibration madule
+#define CCxxx0_TXBYTES      (0x3A | 0xc0) // Underflow and number of bytes in TX FIFO
+#define CCxxx0_RXBYTES      (0x3B | 0xc0) // Overflow and number of bytes in RX FIFO
 
 #define CCxxx0_PATABLE      0x3E
 #define CCxxx0_TXFIFO       0x3F
@@ -179,8 +179,8 @@ uint8_t receive_UART0();
 void CC_Transmit();
 void  CC_Receive();
 
-void ATMEGA_Init(void) 
-{	
+void ATMEGA_Init(void)
+{
 	DDRC =0x01;
 	PORTC=0x01;
 
@@ -189,17 +189,17 @@ void ATMEGA_Init(void)
 // SPI register config
 	DDRB &= ~(1 << SPIDI);	// set port B SPI data input to input
 	DDRB |= (1 << SPICLK) ;	// set port B SPI clock to output
-	DDRB |= (1 << SPIDO);	// set port B SPI data out to output 
+	DDRB |= (1 << SPIDO);	// set port B SPI data out to output
 	DDRB |= (1 << SPICS);	// set port B SPI chip select to output
 	DDRB &= ~(1 << CC_GDO0);	// set port B packet received pin to input
-	
+
 	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) | (1 << SPR0) ;//| (1 << SPI2X) ;// | (1 << SPR1) ;// | (1 << SPR0);
-	SPSR = 0x00;	
+	SPSR = 0x00;
 
 	PORTB |= (1 << SPICS);	// set chip select to high (CC is NOT selected)
 	PORTB &= ~(1 << SPIDO);	// data out =0
 	PORTB |= (1 << SPICLK); // clock out =1
-	
+
 }
 
 
@@ -290,7 +290,7 @@ unsigned char ccxxx0_Write(unsigned char addr, unsigned char dat)
 	SPDR = addr;
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR;// flush SPDR
-	
+
 	SPDR = dat;
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // get data from SPDR
@@ -371,21 +371,21 @@ void ccxxx0_PowerOnReset()
 	_delay_us(1);
     PORTB |= (1 << CC_CSN);
 	_delay_us(41);
-	
+
 	PORTB &= ~(1 << CC_CSN);
-	
+
 	while(PINB & (1 << CC_SO));
-	
-	_delay_us(50); 
+
+	_delay_us(50);
 
     SPDR = CCxxx0_SRES;
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // flush SPDR
-	
+
 	while(PINB & (1 << CC_SO));
 
-	_delay_us(50); 
-	
+	_delay_us(50);
+
     PORTB |= (1 << CC_CSN);
 }
 void ccxxx0_Setup(const RF_SETTINGS* settings)
@@ -394,7 +394,7 @@ void ccxxx0_Setup(const RF_SETTINGS* settings)
     // Write register settings
     ccxxx0_Write(CCxxx0_IOCFG0,   settings->IOCFG0);
 	read = ccxxx0_Read(CCxxx0_IOCFG0);
-	transmit_UART0(read);    
+	transmit_UART0(read);
     ccxxx0_Write(CCxxx0_FIFOTHR,  settings->FIFOTHR);
 	read = ccxxx0_Read(CCxxx0_FIFOTHR);
 	transmit_UART0(read);
@@ -458,31 +458,31 @@ void ccxxx0_Setup(const RF_SETTINGS* settings)
 	transmit_UART0(read);
     ccxxx0_Write(CCxxx0_TEST0,    settings->TEST0);
 	read = ccxxx0_Read(CCxxx0_TEST0);
-	transmit_UART0(read);	
+	transmit_UART0(read);
 }
 
 void CC_Transmit(unsigned int pkt_length)
 {
 	PORTC = 0xff;
 	char temp[61];
-	
+
 	//strcpy((char*)data_transmit, (const char*)address);
 	for (int i = 0; i<61; i++)
 	{
 		data_transmit[i] =  address[i];
 	}
-	
+
 	/*for (int i = 0; i<35; i++)
 	{
 		data_transmit[i] =  0xAA;
 	}*/
-	
-	
+
+
 	//if(data_transmit[34]==0x7E){PORTC = 0xAA;};
 	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
 	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
 	ccxxx0_Strobe(CCxxx0_SFTX); // flush tx buff
-	
+
 	ccxxx0_Strobe(CCxxx0_STX); // goto tx mode
 	ccxxx0_WriteBurst(CCxxx0_TXFIFO, (unsigned char*)data_transmit,61); // addr=M, payload=4 bytes, Total PKTLEN=5//see cc1101 datasheet pg no.-40
 	//ccxxx0_ReadBurst(CCxxx0_TXFIFO, (unsigned char*)data_transmit,35);
@@ -490,7 +490,7 @@ void CC_Transmit(unsigned int pkt_length)
 	_delay_ms(5);
 	//ccxxx0_Strobe(CCxxx0_STX); // goto tx mode
 	_delay_ms(75);// initially 120ms
-	
+
 	ccxxx0_Strobe(CCxxx0_SIDLE);
 	_delay_ms(10);
 	PORTC = 0x00;
@@ -515,7 +515,7 @@ void CC_Receive()
 		if(transmit_enable==1)
 		{
 			transmit_string_UART0("transmitting\r\n");
-			CC_Transmit(pkt_length);	
+			CC_Transmit(pkt_length);
 			transmit_check=1;
 			//Receive Enable
 			ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
@@ -525,15 +525,15 @@ void CC_Receive()
 			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
 			transmit_string_UART0("transmitted\r\n");
 		}
-			
-		
+
+
 		// If you have a package for us
-		
+
 		else if( PINB&(1 << CC_GDO0) )
 		{
 			transmit_string_UART0("package available \n");
 			while(PINB&(1 << CC_GDO0));
-			
+
 			ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp, 8);
 			transmit_string_UART0("RXed data: ");
 			transmit_string_UART0((char *)temp);
@@ -549,8 +549,8 @@ void CC_Receive()
 					transmit_UART0(temp[7]);
 					ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp,4);
 					transmit_string_UART0((char *)temp);
-				}	
-				
+				}
+
 				else
 				{
 					transmit_string_UART0((char *)address);
@@ -559,14 +559,14 @@ void CC_Receive()
 					ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp, pkt_length-8);
 					transmit_string_UART0((char *)temp);
 				}
-			}	
+			}
 			ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
 			ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
 			_delay_ms(1);
 			ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buf
 			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
 		}
-	}		
+	}
 }
 ISR(USART_RXC_vect){
 	cli();
@@ -574,7 +574,7 @@ ISR(USART_RXC_vect){
 	int i = 0;
 	address[i] = UDR;
 	//if(address[i]==0x7E){PORTC = 0xCC;}
-		
+
 		for(i = 1;i<61; i++){
 			char temp = receive_UART0();
 			address[i] = temp;}
@@ -585,17 +585,17 @@ ISR(USART_RXC_vect){
 		//transmitFlag = 1;
 		sei();
 	//transmit_string_UART0("In ISR");
-	
+
 	//transmit_string_UART0("Out of ISR");
 }
 /*****
 	MAIN program
 *****/
 int main(void)
-{	
-	cli(); 							//Clears the global interrupts			
+{
+	cli(); 							//Clears the global interrupts
 	ATMEGA_Init();
-	sei(); 
+	sei();
 
 	DDRC = 0b00001111;
 	PORTC = 0xFF;
@@ -610,7 +610,7 @@ int main(void)
 		{
 			//CC_Transmit(61);
 			//_delay_ms(1000);
-			
+
 			/*
 			if(transmitFlag == 1){
 			CC_Transmit(8);
@@ -620,7 +620,7 @@ int main(void)
 			}
 			*/
 		}
-		
+
 
 	// LOOP HERE FOREVER .. if we ever come here :)
 	while (1) { asm("nop"); }
