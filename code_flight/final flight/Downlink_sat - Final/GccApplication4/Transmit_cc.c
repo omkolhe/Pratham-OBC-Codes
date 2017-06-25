@@ -161,8 +161,15 @@ typedef struct RF_SETTINGS {
 } RF_SETTINGS;
 
 unsigned char ccxxx0_Strobe(unsigned char);
+
 unsigned char ccxxx0_Read(unsigned char);
+ // Input parameters - adddress of the Byte to be read.
+ //Return parameters - the value of byte stored at that address
+
 unsigned char ccxxx0_Write(unsigned char, unsigned char);
+// Input parameters - address of byte to be written, the byte to be written
+// Return parameters - the Chip Status byte
+
 void ccxxx0_ReadBurst(unsigned char, unsigned char*, unsigned int);
 void ccxxx0_WriteBurst(unsigned char, unsigned char*, unsigned int);
 
@@ -262,20 +269,21 @@ unsigned char paTable[] = {
 
 unsigned char ccxxx0_Read(unsigned char addr)
 {
-	unsigned char x;
-	PORTB &= ~(1 << CC_CSN);
+	unsigned char x; // The variable where the read Byte is stored
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = (addr | 0x80);
-	while(!(SPSR & (1<<SPIF)));
+	SPDR = (addr | 0x80); // Header byte R/~W bit - 1 Burst bit - 0
+	while(!(SPSR & (1<<SPIF))); // Wait for transmission to be completed
 	x = SPDR; // flush SPDR
 
+// Receiving the byte at addr
 	SPDR = 0;
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; //// flush SPDR
 
-	PORTB |= (1 << CC_CSN);
+	PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 
 	return x;
 }
@@ -283,21 +291,21 @@ unsigned char ccxxx0_Read(unsigned char addr)
 unsigned char ccxxx0_Write(unsigned char addr, unsigned char dat)
 {
 	unsigned char x;
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = addr;
+	SPDR = addr; // Header Byte R/~W bit - 0 Burst bit - 0
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR;// flush SPDR
 
-	SPDR = dat;
+	SPDR = dat; // data to be written at addr
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // get data from SPDR
 
 	PORTB |= (1 << CC_CSN);
 
-	return x;
+	return x; // The CHip Status Byte 
 }
 
 unsigned char ccxxx0_Strobe(unsigned char addr)
