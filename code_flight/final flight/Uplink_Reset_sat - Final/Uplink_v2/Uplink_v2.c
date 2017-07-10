@@ -3,7 +3,7 @@
  *
  * Created: 11-10-2014 15:05:52
  *  Author: Someone Stud
- */ 
+ */
 
 
 #include "uart.h"
@@ -163,14 +163,36 @@ typedef struct RF_SETTINGS {
 } RF_SETTINGS;
 
 unsigned char ccxxx0_Strobe(unsigned char);
+// Input parameters - adddress of the Command Strobe
+//Return parameters - the Chip Status byte
+
 unsigned char ccxxx0_Read(unsigned char);
+ // Input parameters - adddress of the Byte to be read.
+ //Return parameters - the value of byte stored at that address
+
 unsigned char ccxxx0_Write(unsigned char, unsigned char);
+// Input parameters - address of byte to be written, the byte to be written
+// Return parameters - the Chip Status byte
+
 void ccxxx0_ReadBurst(unsigned char, unsigned char*, unsigned int);
+/** Input parameters - address of first byte to be read,
+                       the pointer of the array where we have to store the read values,
+											 the number of bytes to be read
+    Return parameters - void */
+
 void ccxxx0_WriteBurst(unsigned char, unsigned char*, unsigned int);
+/** Input parameters - address of first byte where we have to write,
+                       the pointer of the array where the values to be written are stored,
+											 the number of bytes to be written
+    Return parameters - void */
+
 
 void ccxxx0_PowerOnReset();
+// Power on reset. The manual reset is choosed.
+//The exact details of manual reset on page 51 datasheet.
 
 void ccxxx0_Setup(const RF_SETTINGS*);
+// Write all the RF Settings Registers one by one. And echo to Computer using USART
 
 void ATMEGA_Init(void);
 void init_UART0(void);
@@ -199,14 +221,14 @@ PORTD |= (1<<PD7);
 	DDRB |= (1 << SPIDO);	// set port B SPI data out to output
 	DDRB |= (1 << SPICS);	// set port B SPI chip select to output
 	DDRB &= ~(1 << CC_GDO0);	// set port B packet received pin to input
-	
+
 	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) | (1 << SPR0) ;//| (1 << SPI2X) ;// | (1 << SPR1) ;// | (1 << SPR0);
 	SPSR = 0x00;
 
 	PORTB |= (1 << SPICS);	// set chip select to high (CC is NOT selected)
 	PORTB &= ~(1 << SPIDO);	// data out =0
 	PORTB |= (1 << SPICLK); // clock out =1
-	
+
 }
 
 
@@ -269,20 +291,21 @@ unsigned char paTable[] = {
 
 unsigned char ccxxx0_Read(unsigned char addr)
 {
-	unsigned char x;
-	PORTB &= ~(1 << CC_CSN);
+	unsigned char x; // The variable where the read Byte is stored
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = (addr | 0x80);
-	while(!(SPSR & (1<<SPIF)));
+	SPDR = (addr | 0x80); // Header byte R/~W bit - 1 Burst bit - 0
+	while(!(SPSR & (1<<SPIF))); // Wait for transmission to be completed
 	x = SPDR; // flush SPDR
 
+// Receiving the byte at addr
 	SPDR = 0;
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; //// flush SPDR
 
-	PORTB |= (1 << CC_CSN);
+	PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 
 	return x;
 }
@@ -290,111 +313,114 @@ unsigned char ccxxx0_Read(unsigned char addr)
 unsigned char ccxxx0_Write(unsigned char addr, unsigned char dat)
 {
 	unsigned char x;
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = addr;
+	SPDR = addr; // Header Byte R/~W bit - 0 Burst bit - 0
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR;// flush SPDR
-	
-	SPDR = dat;
+
+	SPDR = dat; // data to be written at addr
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // get data from SPDR
 
-	PORTB |= (1 << CC_CSN);
+	PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 
-	return x;
+	return x; // The Chip Status Byte
 }
 
 unsigned char ccxxx0_Strobe(unsigned char addr)
 {
-	unsigned char x;
-	PORTB &= ~(1 << CC_CSN);
+    unsigned char x;
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = addr;
+    SPDR = addr; // The address of the Strobe Command
 	while(!(SPSR & (1<<SPIF)));
-	x = SPDR; // flush SPDR
+    x = SPDR; // flush SPDR the Status Byte
 
-	PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 
-	return x;
+    return x;
 }
 
 void ccxxx0_ReadBurst(unsigned char addr, unsigned char* dataPtr, unsigned int dataCount)
 {
 	unsigned char x;
 
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = (addr | 0xc0);
+    SPDR = (addr | 0xc0); // Header Byte R/~W bit - 1 Burst bit - 1
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR;// flush SPDR
 
-	while(dataCount) {
-		SPDR = 0;
+	while(dataCount) { // Loop that stops communication when desired number of bytes are read
+	    SPDR = 0;
 		while(!(SPSR & (1<<SPIF)));
 
-		*dataPtr++ = SPDR; // get data from SPDR
+	    *dataPtr++ = SPDR; // get data from SPDR, *dataPtr++ points the next element
 		dataCount--;
 	}
 
-	PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 }
 
 void ccxxx0_WriteBurst(unsigned char addr, unsigned char* dataPtr, unsigned int dataCount)
 {
 	unsigned char x;
 
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // make the SS pin low to start the communication
 
 	while(PINB & (1 << CC_SO));
 
-	SPDR = addr | 0x40;
+    SPDR = addr | 0x40; // Header Byte R/~W bit - 0 Burst bit - 1
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // flush SPDR
 
-	while(dataCount) {
-		SPDR = *dataPtr++;
+	while(dataCount) { // Loop that stops communication after desired number of writing cycles
+	    SPDR = *dataPtr++;
 		while(!(SPSR & (1<<SPIF)));
 
 		dataCount--;
 	}
 
-	PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high to stop communication
 }
 
-void ccxxx0_PowerOnReset()
+void ccxxx0_PowerOnReset() // Manual Reset
 {
 	unsigned char x;
-	//datasheet cc1101 pg on.51
-	PORTB |= (1 << CC_CSN);
+	//datasheet cc1101 pg on.51 Manual Reset
+    PORTB |= (1 << CC_CSN); // Make SS high
 	_delay_us(1);
-	PORTB &= ~(1 << CC_CSN);
+	PORTB &= ~(1 << CC_CSN); // Make SS low
 	_delay_us(1);
-	PORTB |= (1 << CC_CSN);
+    PORTB |= (1 << CC_CSN); // Make SS high fot atleast 41 us
 	_delay_us(41);
-	
-	PORTB &= ~(1 << CC_CSN);
-	
-	while(PINB & (1 << CC_SO));
-	
+
+	PORTB &= ~(1 << CC_CSN); // Make SS low
+
+	while(PINB & (1 << CC_SO)); // wait for SO to go low
+
 	_delay_us(50);
 
-	SPDR = CCxxx0_SRES;
+    SPDR = CCxxx0_SRES; // Isssue the SRES command strobe
 	while(!(SPSR & (1<<SPIF)));
 	x = SPDR; // flush SPDR
-	
-	while(PINB & (1 << CC_SO));
+
+	while(PINB & (1 << CC_SO)); // When SO goes low again, reset is complete
+
+// **THE CHIP IS IDLE STATE AFTER RESET**
 
 	_delay_us(50);
-	
-	PORTB |= (1 << CC_CSN);
+
+    PORTB |= (1 << CC_CSN); // Make SS high
 }
+
 void ccxxx0_Setup(const RF_SETTINGS* settings)
 {
 	unsigned char read;
@@ -471,22 +497,22 @@ void ccxxx0_Setup(const RF_SETTINGS* settings)
 void CC_Transmit(unsigned int pkt_length)
 {
 	char temp[7];
-	
+
 	strcpy((char*)data_transmit, (const char*)address);
 	data_transmit[7]='2';
-	
+
 	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
 	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
 	ccxxx0_Strobe(CCxxx0_SFTX); // flush tx buff
-	
+
 	ccxxx0_WriteBurst(CCxxx0_TXFIFO, (unsigned char*)data_transmit,8); // addr=M, payload=4 bytes, Total PKTLEN=5//see cc1101 datasheet pg no.-40
 	_delay_ms(5);
 	ccxxx0_Strobe(CCxxx0_STX); // goto tx mode
 	_delay_ms(120);
-	
+
 	ccxxx0_Strobe(CCxxx0_SIDLE);
 	_delay_ms(50);
-	
+
 	transmit_string_UART0("transmitted Data: ");
 	transmit_string_UART0((unsigned char *)data_transmit);
 	transmit_string_UART0("\r\n");
@@ -518,42 +544,42 @@ void CC_Receive()
 			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
 			transmit_string_UART0("transmitted\r\n");
 		}*/
-			
+
 		// If you have a package for us
 		//transmit_string_UART0((unsigned char *)"Checking \n");
-		
+
 		if( PINB&(1 << CC_GDO0) )
 		{
 			//transmit_string_UART0("package available \n");
 			while(PINB&(1 << CC_GDO0)){
-				//transmit_string_UART0("in");	
+				//transmit_string_UART0("in");
 			}
 			//char bytes_RXFIFO = ccxxx0_Read(CCxxx0_RXBYTES);
-			
+
 			char bytes_RXFIFO = ccxxx0_Read(CCxxx0_RXBYTES);
 			/*for(int i = 0; i<; i++)
 			{
 				temp[i] = '\0';
 			}*/
-			
-			
+
+
 			//for(int i =0; i<35; i++){
 			//temp[i] = ccxxx0_Read(CCxxx0_RXFIFO);}
 			ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp,39);
 			//transmit_string_UART0("RXed data: ");
-			
+
 			ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buf
 			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
 			/*for(int i = 0; i< 39; i++){
 				transmit_UART0(temp[i]);
 			}
 			*/
-			if ((temp[1] == 'A')&&(temp[2] == 'A')){
+			if ((temp[1] == 'A')&&(temp[2] == 'A')){ // 'A' in binary is 01000001
 			for(int i=0;i<12;i++) {
 				data[i] = temp[24+i];
 			}
 			data[13]='\0';
-			
+
 			uint8_t *framePtr;
 			framePtr = temp;
 			crc = crc16(temp+1,35);
@@ -586,7 +612,7 @@ void CC_Receive()
 				}
 				_delay_ms(5);
 			}
-			
+
 			}
 			//transmit_UART0(bytes_RXFIFO);
 			//_delay_ms(1);
@@ -602,7 +628,7 @@ void CC_Receive()
 					//ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp,4);
 					//transmit_string_UART0((char *)temp);
 				}
-				
+
 				else
 				{
 					transmit_string_UART0((char *)address);
@@ -634,10 +660,10 @@ int main(void) {
 	/*uint8_t rssi_dec;
 	int16_t rssi_dBm;
 	uint8_t rssi_offset = 74; // CC1101 at 433 MHz*/
-	
-	cli(); 							//Clears the global interrupts			
+
+	cli(); 							//Clears the global interrupts
 	ATMEGA_Init();
-	sei(); 
+	sei();
 
 	//transmit_string_UART0((unsigned char *)"cc1101_PowerOnReset\r\n");
 	_delay_ms(2000);
@@ -668,4 +694,3 @@ int main(void) {
 
 	return 0;
 }
-		

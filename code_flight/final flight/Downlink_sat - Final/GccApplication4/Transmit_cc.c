@@ -189,6 +189,7 @@ void ccxxx0_PowerOnReset();
 //The exact details of manual reset on page 51 datasheet.
 
 void ccxxx0_Setup(const RF_SETTINGS*);
+// Write all the RF Settings Registers one by one. And echo to Computer using USART
 
 void ATMEGA_Init(void);
 void init_UART0(void);
@@ -272,7 +273,7 @@ RF_SETTINGS rfSettings = { // Defining object of struct
 
 
 
-// PATABLE (+10 dBm output power)
+// PATABLE (0 dBm output power) // Page number 60 CC1101 datasheet
 unsigned char paTable[] = {
 	0x60 //, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0
 	//0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03
@@ -415,9 +416,9 @@ void ccxxx0_Setup(const RF_SETTINGS* settings)
 {
 	unsigned char read;
     // Write register settings
-    ccxxx0_Write(CCxxx0_IOCFG0,   settings->IOCFG0);
-	read = ccxxx0_Read(CCxxx0_IOCFG0);
-	transmit_UART0(read);
+    ccxxx0_Write(CCxxx0_IOCFG0,   settings->IOCFG0); // Write the register value at its address
+	read = ccxxx0_Read(CCxxx0_IOCFG0); // Read the written register back and send it through UART
+	transmit_UART0(read);// Send the read value through UART
     ccxxx0_Write(CCxxx0_FIFOTHR,  settings->FIFOTHR);
 	read = ccxxx0_Read(CCxxx0_FIFOTHR);
 	transmit_UART0(read);
@@ -527,7 +528,7 @@ void CC_Receive()
 	transmit_enable = 1;
 	unsigned char temp[30];
 	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
-	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
+	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // Power - 0 dBm
 	_delay_ms(1);
 	ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buff
 	ccxxx0_Strobe(CCxxx0_SRX);// goto rx mode
@@ -592,10 +593,10 @@ void CC_Receive()
 	}
 }
 ISR(USART_RXC_vect){
-	cli();
+	cli(); //disable intterupts
 	//transmitFlag = 0;
 	int i = 0;
-	address[i] = UDR;
+	address[i] = UDR; //
 	//if(address[i]==0x7E){PORTC = 0xCC;}
 
 		for(i = 1;i<61; i++){
@@ -606,7 +607,7 @@ ISR(USART_RXC_vect){
 		address[i] = '\0';
 		CC_Transmit(61);
 		//transmitFlag = 1;
-		sei();
+		sei(); // Global interrupts enable
 	//transmit_string_UART0("In ISR");
 
 	//transmit_string_UART0("Out of ISR");
