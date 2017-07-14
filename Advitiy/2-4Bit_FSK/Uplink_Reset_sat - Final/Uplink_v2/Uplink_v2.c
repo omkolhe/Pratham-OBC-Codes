@@ -494,34 +494,11 @@ void ccxxx0_Setup(const RF_SETTINGS* settings)
 	//transmit_UART0(read);
 }
 
-void CC_Transmit(unsigned int pkt_length)
-{
-	char temp[7];
-
-	strcpy((char*)data_transmit, (const char*)address);
-	data_transmit[7]='2';
-
-	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
-	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
-	ccxxx0_Strobe(CCxxx0_SFTX); // flush tx buff
-
-	ccxxx0_WriteBurst(CCxxx0_TXFIFO, (unsigned char*)data_transmit,8); // addr=M, payload=4 bytes, Total PKTLEN=5//see cc1101 datasheet pg no.-40
-	_delay_ms(5);
-	ccxxx0_Strobe(CCxxx0_STX); // goto tx mode
-	_delay_ms(120);
-
-	ccxxx0_Strobe(CCxxx0_SIDLE);
-	_delay_ms(50);
-
-	transmit_string_UART0("transmitted Data: ");
-	transmit_string_UART0((unsigned char *)data_transmit);
-	transmit_string_UART0("\r\n");
-}
 
 void CC_Receive()
 {
 	transmit_enable = 0;
-	unsigned char temp[40];
+	unsigned char temp[62];
 	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
 	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
 	_delay_ms(1);
@@ -565,7 +542,7 @@ void CC_Receive()
 
 			//for(int i =0; i<35; i++){
 			//temp[i] = ccxxx0_Read(CCxxx0_RXFIFO);}
-			ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp,39);
+			ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp,61);
 			//transmit_string_UART0("RXed data: ");
 
 			ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buf
@@ -574,15 +551,15 @@ void CC_Receive()
 				transmit_UART0(temp[i]);
 			}
 			*/
-			if ((temp[1] == 'A')&&(temp[2] == 'A')){ // 'A' in binary is 01000001
-			for(int i=0;i<12;i++) {
+			if ((temp[1] == 'C')&&(temp[2] == 'Q')){ // 'A' in binary is 01000001
+			for(int i=0;i<34;i++) {
 				data[i] = temp[24+i];
 			}
-			data[13]='\0';
+			data[35]='\0';
 
 			uint8_t *framePtr;
 			framePtr = temp;
-			crc = crc16(temp+1,35);
+			crc = crc16(temp+1,57);
 			//transmit_string_UART0("CRC Computed=\r\n");
 			_delay_ms(5);
 			crc1 = crc;
@@ -591,23 +568,23 @@ void CC_Receive()
 			transmit_UART0(crc2);
 			_delay_ms(10);
 			//transmit_string_UART0("      ");
-			uint16_t crcFromMsg = ((uint16_t)temp[36] << 8) | temp[37];
+			uint16_t crcFromMsg = ((uint16_t)temp[58] << 8) | temp[59];
 			//transmit_string_UART0("CRC from Msg =");
 			_delay_ms(5);
-			transmit_UART0(temp[36]);
-			transmit_UART0(temp[37]);
+			transmit_UART0(temp[58]);
+			transmit_UART0(temp[59]);
 			_delay_ms(10);
 			//transmit_string_UART("Now checking equality of the CRCs\r\n");
 			//_delay_ms(5);
 			//Check if CRCs match
-			if((crc1==temp[36])&&(crc2==temp[37])){
+			if((crc1==temp[58])&&(crc2==temp[59])){
 			//	transmit_string_UART0("Frame Received with no errors\r\n");
 				_delay_ms(5);
 				//transmit_string_UART0("Data = ");
 				_delay_ms(5);
 				//transmit_string_UART0(data);
-				data[12] = 'm';
-				for(int i =0; i<13; i++){
+				data[34] = 'm';
+				for(int i =0; i<35; i++){
 					transmit_UART0(data[i]);
 				}
 				_delay_ms(5);

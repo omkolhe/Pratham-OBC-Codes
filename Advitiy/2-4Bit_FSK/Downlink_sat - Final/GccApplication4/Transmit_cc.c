@@ -496,13 +496,6 @@ void CC_Transmit(unsigned int pkt_length)
 		data_transmit[i] =  address[i];
 	}
 
-	/*for (int i = 0; i<35; i++)
-	{
-		data_transmit[i] =  0xAA;
-	}*/
-
-
-	//if(data_transmit[34]==0x7E){PORTC = 0xAA;};
 	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
 	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
 	ccxxx0_Strobe(CCxxx0_SFTX); // flush tx buff
@@ -523,75 +516,7 @@ void CC_Transmit(unsigned int pkt_length)
 	//transmit_string_UART0("\r\n");
 }
 
-void CC_Receive()
-{
-	transmit_enable = 1;
-	unsigned char temp[30];
-	ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
-	ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // Power - 0 dBm
-	_delay_ms(1);
-	ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buff
-	ccxxx0_Strobe(CCxxx0_SRX);// goto rx mode
-	transmit_string_UART0("Started\r\n");
-	while(1)
-	{
-		char bytes_RXFIFO = ccxxx0_Read(CCxxx0_RXBYTES);
-		if(transmit_enable==1)
-		{
-			transmit_string_UART0("transmitting\r\n");
-			CC_Transmit(pkt_length);
-			transmit_check=1;
-			//Receive Enable
-			ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
-			ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
-			_delay_ms(1);
-			ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buf
-			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
-			transmit_string_UART0("transmitted\r\n");
-		}
 
-
-		// If you have a package for us
-
-		else if( PINB&(1 << CC_GDO0) )
-		{
-			transmit_string_UART0("package available \n");
-			while(PINB&(1 << CC_GDO0));
-
-			ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp, 8);
-			transmit_string_UART0("RXed data: ");
-			transmit_string_UART0((char *)temp);
-			transmit_string_UART0("\r\n");
-			_delay_ms(1);
-			if (strncmp ((const char *)temp,(const char *)address,6) == 0)
-			{
-				transmit_string_UART0("address matched...\n");
-				if(temp[7]==',')
-				{
-					transmit_string_UART0((char *)address);
-					transmit_UART0(temp[6]);
-					transmit_UART0(temp[7]);
-					ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp,4);
-					transmit_string_UART0((char *)temp);
-				}
-
-				else
-				{
-					transmit_string_UART0((char *)address);
-					transmit_UART0(temp[6]);
-					transmit_UART0(temp[7]);
-					ccxxx0_ReadBurst(CCxxx0_RXFIFO, temp, pkt_length-8);
-					transmit_string_UART0((char *)temp);
-				}
-			}
-			ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
-			ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
-			_delay_ms(1);
-			ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buf
-			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
-		}
-	}
-}
 ISR(USART_RXC_vect){
 	cli(); //disable intterupts
 	//transmitFlag = 0;
@@ -619,7 +544,7 @@ int main(void)
 {
 	cli(); 							//Clears the global interrupts
 	ATMEGA_Init();
-	sei();
+	//sei();
 
 	DDRC = 0b00001111;
 	PORTC = 0xFF;
@@ -630,19 +555,17 @@ int main(void)
 	//transmit_string_UART0("cc1101_Setup\r\n");
 	ccxxx0_Setup(&rfSettings);
 
+	unsigned char test_data[34];
+	memcpy(buf, "IITBOMBAYPRATHAMIITBOMBAYADVITIYXX", AX_ADDR_SIZE);
+	for(int jk = 0; jk < 34; jk++)
+		test_data[jk] = buf[jk];
+
+	make_ax25_frame_from_data((uint8_t)address, (uint8_t *)test_data);
+	addresss[61] = '\0';
 		while(1)
 		{
-			//CC_Transmit(61);
-			//_delay_ms(1000);
-
-			/*
-			if(transmitFlag == 1){
-			CC_Transmit(8);
-			}
-			else {
-				transmit_string_UART0("Did not go in ISR!");
-			}
-			*/
+			CC_Transmit(61);
+			_delay_ms(10000);
 		}
 
 
