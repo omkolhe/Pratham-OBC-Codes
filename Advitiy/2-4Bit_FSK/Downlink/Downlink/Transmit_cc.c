@@ -257,7 +257,7 @@ RF_SETTINGS rfSettings = { // Defining object of struct
 		0X40,        //FREQ0       Frequency Control Word, Low Byte
 		0XF8,        //MDMCFG4     Modem Configuration
 		0X83,        //MDMCFG3     Modem Configuration
-		0X13,        //MDMCFG2     Modem Configuration
+		0X43,        //MDMCFG2     Modem Configuration
 		0X15,        //DEVIATN     Modem Deviation Setting
 		0X18,        //MCSM0       Main Radio Control State Machine Configuration
 		0X16,        //FOCCFG      Frequency Offset Compensation Configuration
@@ -557,7 +557,7 @@ int main(void)
 	ccxxx0_Setup(&rfSettings);
 	uint8_t buf[80];
 	unsigned char test_data[34];
-	memcpy(buf, "IITBOMBAYPRATHAMIITBOMBAYADVITIYXX", AX_ADDR_SIZE);
+	memcpy(buf, "IITBOMBAYPRATHAMIITBOMBAYADVITIYXX", 34);
 	for(int jk = 0; jk < 34; jk++)
 		test_data[jk] = buf[jk];
 
@@ -566,7 +566,7 @@ int main(void)
 		while(1)
 		{
 			CC_Transmit(61);
-			_delay_ms(10000);
+			_delay_ms(5000);
 		}
 
 

@@ -508,30 +508,13 @@ void CC_Receive()
 	while(1)
 	{
 		char bytes_RXFIFO = ccxxx0_Read(CCxxx0_RXBYTES);
-	/*if(transmit_enable==1)
-		{
-			transmit_string_UART0("transmitting\r\n");
-			CC_Transmit(pkt_length);
-			transmit_check=1;
-			//Receive Enable
-			ccxxx0_Strobe(CCxxx0_SIDLE);//Exit RX / TX, turn off frequency synthesizer and exit Wake-On-Radio mode if applicable
-			ccxxx0_WriteBurst(CCxxx0_PATABLE, &paTable[0], 1); // max power
-			_delay_ms(1);
-			ccxxx0_Strobe(CCxxx0_SFRX); // flush rx buf
-			ccxxx0_Strobe(CCxxx0_SRX); // goto rx mode
-			transmit_string_UART0("transmitted\r\n");
-		}*/
-
-		// If you have a package for us
-		//transmit_string_UART0((unsigned char *)"Checking \n");
+	
 		transmit_string_UART0("Check Point - 2");
 		if( PINB&(1 << CC_GDO0) )
 		{
 			//transmit_string_UART0("package available \n");
 			transmit_string_UART0("Check Point - 3");
-			while(PINB&(1 << CC_GDO0)){
-				transmit_string_UART0("Check Point - 4");
-			}
+			while(PINB&(1 << CC_GDO0)){			}
 			//char bytes_RXFIFO = ccxxx0_Read(CCxxx0_RXBYTES);
 
 			char bytes_RXFIFO = ccxxx0_Read(CCxxx0_RXBYTES);

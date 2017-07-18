@@ -4,6 +4,7 @@
  * 
  */
 #include "common.h"
+#include "math.h"
 #include "comm.h"
 #include "mathutil.h"
 #include "timer.h"

@@ -42,7 +42,7 @@ Discarded input sections
                 0x00000000       0x40 ax25.o
  .debug_ranges  0x00000000       0x30 ax25.o
  .debug_line    0x00000000      0x230 ax25.o
- .debug_str     0x00000000      0x1fc ax25.o
+ .debug_str     0x00000000      0x204 ax25.o
  .comment       0x00000000       0x31 ax25.o
  .debug_frame   0x00000000       0x98 ax25.o
  .text          0x00000000        0x0 uart.o
@@ -52,8 +52,6 @@ Discarded input sections
                 0x00000000        0x8 uart.o
  .text.send_preflight
                 0x00000000       0x1c uart.o
- .text.transmit_string_UART0
-                0x00000000       0x18 uart.o
  .text          0x00000000        0x0 uart_8_32.o
  .data          0x00000000        0x0 uart_8_32.o
  .bss           0x00000000        0x0 uart_8_32.o
@@ -78,8 +76,6 @@ Discarded input sections
  .text          0x00000000        0x0 Uplink_v2.o
  .data          0x00000000        0x0 Uplink_v2.o
  .bss           0x00000000        0x0 Uplink_v2.o
- .rodata.str1.1
-                0x00000000       0x15 Uplink_v2.o
  .text.make_ax25_frame_from_data
                 0x00000000      0x10c Uplink_v2.o
  .text.update_crc_16
@@ -274,7 +270,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000      0x47c
+.text           0x00000000      0x4bc
  *(.vectors)
  .vectors       0x00000000       0x26 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega8a/avr4/crtatmega8a.o
                 0x00000000                __vector_default
@@ -360,41 +356,44 @@ END GROUP
  .text.transmit_UART0
                 0x0000007a        0x8 uart.o
                 0x0000007a                transmit_UART0
- .text.crc16    0x00000082       0x5a Uplink_v2.o
+ .text.transmit_string_UART0
+                0x00000082       0x18 uart.o
+                0x00000082                transmit_string_UART0
+ .text.crc16    0x0000009a       0x5a Uplink_v2.o
  .text.ATMEGA_Init
-                0x000000dc       0x24 Uplink_v2.o
-                0x000000dc                ATMEGA_Init
+                0x000000f4       0x24 Uplink_v2.o
+                0x000000f4                ATMEGA_Init
  .text.ccxxx0_Read
-                0x00000100       0x1c Uplink_v2.o
-                0x00000100                ccxxx0_Read
+                0x00000118       0x1c Uplink_v2.o
+                0x00000118                ccxxx0_Read
  .text.ccxxx0_Write
-                0x0000011c       0x1a Uplink_v2.o
-                0x0000011c                ccxxx0_Write
+                0x00000134       0x1a Uplink_v2.o
+                0x00000134                ccxxx0_Write
  .text.ccxxx0_Strobe
-                0x00000136       0x12 Uplink_v2.o
-                0x00000136                ccxxx0_Strobe
+                0x0000014e       0x12 Uplink_v2.o
+                0x0000014e                ccxxx0_Strobe
  .text.ccxxx0_ReadBurst
-                0x00000148       0x30 Uplink_v2.o
-                0x00000148                ccxxx0_ReadBurst
+                0x00000160       0x30 Uplink_v2.o
+                0x00000160                ccxxx0_ReadBurst
  .text.ccxxx0_WriteBurst
-                0x00000178       0x2e Uplink_v2.o
-                0x00000178                ccxxx0_WriteBurst
+                0x00000190       0x2e Uplink_v2.o
+                0x00000190                ccxxx0_WriteBurst
  .text.ccxxx0_PowerOnReset
-                0x000001a6       0x46 Uplink_v2.o
-                0x000001a6                ccxxx0_PowerOnReset
+                0x000001be       0x46 Uplink_v2.o
+                0x000001be                ccxxx0_PowerOnReset
  .text.ccxxx0_Setup
-                0x000001ec       0xde Uplink_v2.o
-                0x000001ec                ccxxx0_Setup
+                0x00000204       0xde Uplink_v2.o
+                0x00000204                ccxxx0_Setup
  .text.CC_Receive
-                0x000002ca      0x188 Uplink_v2.o
-                0x000002ca                CC_Receive
- .text.main     0x00000452       0x26 Uplink_v2.o
-                0x00000452                main
-                0x00000478                . = ALIGN (0x2)
+                0x000002e2      0x1b0 Uplink_v2.o
+                0x000002e2                CC_Receive
+ .text.main     0x00000492       0x26 Uplink_v2.o
+                0x00000492                main
+                0x000004b8                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x00000478        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
-                0x00000478                _exit
-                0x00000478                exit
+ .fini9         0x000004b8        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
+                0x000004b8                _exit
+                0x000004b8                exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -413,11 +412,11 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x00000478        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
+ .fini0         0x000004b8        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
  *(.fini0)
-                0x0000047c                _etext = .
+                0x000004bc                _etext = .
 
-.data           0x00800060       0x16 load address 0x0000047c
+.data           0x00800060       0x8c load address 0x000004bc
                 0x00800060                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
@@ -428,35 +427,38 @@ END GROUP
                 0x00800061                rfSettings
  *(.rodata)
  *(.rodata*)
+ .rodata.str1.1
+                0x00800076       0x75 Uplink_v2.o
  *(.gnu.linkonce.d*)
-                0x00800076                . = ALIGN (0x2)
-                0x00800076                _edata = .
-                0x00800076                PROVIDE (__data_end, .)
+                0x008000ec                . = ALIGN (0x2)
+ *fill*         0x008000eb        0x1 
+                0x008000ec                _edata = .
+                0x008000ec                PROVIDE (__data_end, .)
 
-.bss            0x00800076       0x8b
-                0x00800076                PROVIDE (__bss_start, .)
+.bss            0x008000ec       0x8b
+                0x008000ec                PROVIDE (__bss_start, .)
  *(.bss)
  *(.bss*)
  .bss.transmit_enable
-                0x00800076        0x1 Uplink_v2.o
-                0x00800076                transmit_enable
+                0x008000ec        0x1 Uplink_v2.o
+                0x008000ec                transmit_enable
  *(COMMON)
- COMMON         0x00800077       0x8a Uplink_v2.o
-                0x00800077                data_receive
-                0x008000b3                crc1
-                0x008000b4                crc
-                0x008000b6                data
-                0x008000c4                data_transmit
-                0x00800100                crc2
-                0x00800101                PROVIDE (__bss_end, .)
-                0x0000047c                __data_load_start = LOADADDR (.data)
-                0x00000492                __data_load_end = (__data_load_start + SIZEOF (.data))
+ COMMON         0x008000ed       0x8a Uplink_v2.o
+                0x008000ed                data_receive
+                0x00800129                crc1
+                0x0080012a                crc
+                0x0080012c                data
+                0x0080013a                data_transmit
+                0x00800176                crc2
+                0x00800177                PROVIDE (__bss_end, .)
+                0x000004bc                __data_load_start = LOADADDR (.data)
+                0x00000548                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x00800101        0x0
+.noinit         0x00800177        0x0
                 [!provide]                PROVIDE (__noinit_start, .)
  *(.noinit*)
                 [!provide]                PROVIDE (__noinit_end, .)
-                0x00800101                _end = .
+                0x00800177                _end = .
                 [!provide]                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
@@ -532,11 +534,11 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x1727
+.debug_info     0x00000000     0x17dc
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x48c C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega8a/avr4/crtatmega8a.o
  .debug_info    0x0000048c      0x15c uart.o
- .debug_info    0x000005e8     0x113f Uplink_v2.o
+ .debug_info    0x000005e8     0x11f4 Uplink_v2.o
 
 .debug_abbrev   0x00000000      0x879
  *(.debug_abbrev)
@@ -544,29 +546,29 @@ END GROUP
  .debug_abbrev  0x0000044e       0xd3 uart.o
  .debug_abbrev  0x00000521      0x358 Uplink_v2.o
 
-.debug_line     0x00000000      0xa91
+.debug_line     0x00000000      0xab1
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x109 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega8a/avr4/crtatmega8a.o
  .debug_line    0x00000109      0x16a uart.o
- .debug_line    0x00000273      0x81e Uplink_v2.o
+ .debug_line    0x00000273      0x83e Uplink_v2.o
 
 .debug_frame    0x00000000      0x1b8
  *(.debug_frame)
  .debug_frame   0x00000000       0x64 uart.o
  .debug_frame   0x00000064      0x154 Uplink_v2.o
 
-.debug_str      0x00000000      0x607
+.debug_str      0x00000000      0x64a
  *(.debug_str)
  .debug_str     0x00000000      0x17a C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega8a/avr4/crtatmega8a.o
  .debug_str     0x0000017a      0x18f uart.o
                                 0x1cd (size before relaxing)
- .debug_str     0x00000309      0x2fe Uplink_v2.o
-                                0x492 (size before relaxing)
+ .debug_str     0x00000309      0x341 Uplink_v2.o
+                                0x4b0 (size before relaxing)
 
-.debug_loc      0x00000000      0xdd7
+.debug_loc      0x00000000      0xde3
  *(.debug_loc)
  .debug_loc     0x00000000       0x7f uart.o
- .debug_loc     0x0000007f      0xd58 Uplink_v2.o
+ .debug_loc     0x0000007f      0xd64 Uplink_v2.o
 
 .debug_macinfo
  *(.debug_macinfo)
